@@ -7,7 +7,7 @@ defmodule Todo.Server do
   # In this case, a long initialization of a to-do server will block the cache process, which is used by many clients.
   @impl GenServer
   def init(name) do
-    {:ok,{name, Todo.Database.get(name) || Todo.List.new()}}
+    {:ok,{name, Todo.SupervisedDatabase.get(name) || Todo.List.new()}}
   end
 
   # To circumvent this problem, there’s a simple trick. You can use init/1 to send yourself an internal message
@@ -49,7 +49,7 @@ defmodule Todo.Server do
   @impl GenServer
   def handle_cast({:put, entry}, {name,state}) do
     new_state = Todo.List.add_entry(state, entry)
-    Todo.Database.store(name, new_state)
+    Todo.SupervisedDatabase.store(name, new_state)
     {:noreply, {name, new_state}}
   end
 
