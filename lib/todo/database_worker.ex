@@ -3,11 +3,12 @@ defmodule Todo.DatabaseWorker do
 
   @impl GenServer
   def init(db_folder) do
+    IO.puts "init Todo.DatabaseWorker"
     {:ok, db_folder}
   end
 
   @impl GenServer
-  def handle_cast({:store, key, value},_ , db_folder) do
+  def handle_cast({:store, key, value}, db_folder) do
     db_folder
       |> file_name(key)
       |> File.write!(:erlang.term_to_binary(value))
@@ -15,7 +16,7 @@ defmodule Todo.DatabaseWorker do
   end
 
   @impl GenServer
-  def handle_call({:get, key}, db_folder) do
+  def handle_call({:get, key}, _, db_folder) do
     binary_value =
        db_folder
        |> file_name(key)

@@ -5,6 +5,7 @@ defmodule Todo.Database do
 
   @impl GenServer
   def init(_) do
+    IO.puts "init Todo.Database"
     File.mkdir(@db_folder)
     {:ok, start_workers()}
   end
@@ -22,8 +23,8 @@ defmodule Todo.Database do
     end
   end
 
-  def start() do
-    GenServer.start(__MODULE__, nil, name: __MODULE__)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   def store(key,value) do
