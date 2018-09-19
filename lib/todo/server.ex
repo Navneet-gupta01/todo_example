@@ -53,15 +53,15 @@ defmodule Todo.Server do
     {:noreply, {name, new_state}}
   end
 
-  def start(name) do
-    GenServer.start(__MODULE__, name)
+  def start_link(name) do
+    GenServer.start_link(__MODULE__, name)
   end
 
   def add_entry(todo_server, entry) do
-    GenServer.cast(todo_server, {:put,entry})
+    GenServer.cast(todo_server, {:put, entry})
   end
 
   def entries(todo_server, date) do
-    GenServer.call(todo_server, {:get,date}, 5000)
+    GenServer.call(todo_server, {:get, date}, 5000)
   end
 end

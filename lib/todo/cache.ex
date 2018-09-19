@@ -14,7 +14,7 @@ defmodule Todo.Cache do
     IO.puts "Server_process handle_Call for #{todo_name}"
     case Map.fetch(state, todo_name) do
       :error ->
-        {:ok, server_process} = Todo.Server.start(todo_name)
+        {:ok, server_process} = Todo.Server.start_link(todo_name)
         {:reply, server_process, Map.put(state, todo_name, server_process)}
       {:ok, server_process} ->
         {:reply, server_process, state}
