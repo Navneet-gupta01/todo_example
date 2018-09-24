@@ -15,7 +15,7 @@ defmodule TodoSupervised.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      # mod: {Todo.Application, []}
+      mod: {Todo.Application, []}
     ]
   end
 
