@@ -21,13 +21,37 @@ defmodule Todo.Cache do
   end
 
   # need one arg since options will be passed from Supervisor for any initialization
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+  def start_link() do
+    # GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+    DynamicSupervisor.start_link(
+      name: __MODULE__,
+      strategy: :one_for_one
+    )
   end
+
+  defp start_child(todo_list_name) do
+    DynamicSupervisor.start_child(
+      __MODULE__,
+      {Todo.Server, todo_list_name}  # will lead to the invocation of Todo.Server.start_link(todo_list_name)
+    )
+  end
+
+  def child_spec(_arg) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []},
+      type: :supervisor
+    }
+  end
+
 
   def server_process(todo_name) do
     IO.puts "Server_process for #{todo_name}"
-    GenServer.call(__MODULE__,{:server_processes, todo_name}, 5000)
+    # GenServer.call(__MODULE__,{:server_processes, todo_name}, 5000)
+    case start_child(todo_name) do
+      {:ok, pid} -> pid
+      {:error, {:already_started, pid}} -> pid
+    end
   end
 end
 

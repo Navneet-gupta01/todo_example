@@ -1,5 +1,5 @@
 defmodule Todo.Server do
-  use GenServer
+  use GenServer, restart: :temporary
 
   # This is a simplistic approach that works for this case, but you should generally be careful about
   # possibly long-running init/1 callbacks. Recall that GenServer.start returns only after the process
@@ -54,7 +54,7 @@ defmodule Todo.Server do
   end
 
   def start_link(name) do
-    GenServer.start_link(__MODULE__, name)
+    GenServer.start_link(__MODULE__, name, name: via_tuple(name))
   end
 
   def add_entry(todo_server, entry) do
@@ -63,5 +63,9 @@ defmodule Todo.Server do
 
   def entries(todo_server, date) do
     GenServer.call(todo_server, {:get, date}, 5000)
+  end
+
+  defp via_tuple(name) do
+    ProcessRegistry.via_tuple({__MODULE__, name})
   end
 end
