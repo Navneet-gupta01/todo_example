@@ -27,17 +27,38 @@ defmodule Todo.Database do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def store(key,value) do
-    choose_worker(key)
-    |> Todo.DatabaseWorker.store(key, value)
+  def store(key, data) do
+    :poolboy.transaction(
+      __MODULE__,
+      fn worker_pid ->
+        Todo.DatabaseWorker.store(worker_pid, key, data)
+      end
+    )
   end
-
+  
   def get(key) do
-    choose_worker(key)
-    |> Todo.DatabaseWorker.get(key)
+    :poolboy.transaction(
+      __MODULE__,
+      fn worker_pid ->
+        Todo.DatabaseWorker.get(worker_pid, key)
+      end
+    )
   end
 
   defp choose_worker(key) do
     GenServer.call(__MODULE__, {:choose_worker, key}, 5000)
+  end
+
+  def child_spec(_) do
+    File.mkdir_p!(@db_folder)
+    :poolboy.child_spec(
+        __MODULE__,
+        [
+          name: {:local, __MODULE__},
+          worker_module: Todo.DatabaseWorker,
+          size: 3
+        ],
+      [@db_folder]
+    )
   end
 end
